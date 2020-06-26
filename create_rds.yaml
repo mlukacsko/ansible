@@ -1,0 +1,22 @@
+---
+ - hosts: localhost
+   gather_facts: no
+   module_defaults:
+     group/aws:
+       region: "us-east-2"
+   tasks:
+     - name: restore RDS from snapshot
+        rds:
+        command: restore
+        snapshot: image-gallery-db-snapshot
+        instance_name: M5-image-gallery-rds
+        instance_type: db.t2.micro
+        region: us-east-2
+        zone: us-east-2a
+        subnet: "{{ public_subnet.subnet.id }}"
+        wait: yes
+        wait_timeout: 600
+        tags:
+          Name: Module5-RDS
+      register: rds
+
