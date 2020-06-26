@@ -88,8 +88,8 @@
         name: m5-public-acl
         region: us-east-1
         subnets: "{{ public_subnet.subnet.id }}"
-        tags:
-          Name: m5-public-acl
+#        tags:
+#          Name: m5-public-acl
         ingress:
             # rule no, protocol, allow/deny, cidr, icmp_type, icmp_code,
             #                                             port from, port to
