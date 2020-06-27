@@ -5,27 +5,43 @@
      group/aws:
        region: "us-east-2"
    tasks:
-     - name: create iam user
-       iam_user:
-         name: m5admin
-         state: present
-     - name: create iam group
-       iam_group: 
-         name: m5administrator
-         managed_policy:
-           - arn:aws:iam::aws:policy/AdministratorAccess
-         users:
-           - m5admin
-         state: present
+#     - name: create iam user
+#       iam_user:
+#         name: m5admin
+#         state: present
+#     - name: create iam group
+#       iam_group: 
+#         name: m5administrator
+#         managed_policy:
+#           - arn:aws:iam::aws:policy/AdministratorAccess
+#         users:
+#           - m5admin
+#         state: present
+#     - name: create iam policy
+#       iam_managed_policy:
+#         policy_name: "m5-iam-policy"
+#         policy_description: "s3 iam policy"
+#         policy: "{{ lookup('file', 'iam-role.json') }}"
+#         state: present
+#     - name: create iam role for launch templat
+#       iam_role:
+#         name: m5-iam-role
+#         assume_role_policy_document: "{{ lookup('file', 'iam-role.json') }}"
+#         managed_policy:
+#           - m5-iam-policy
+#         description: new role for iam user
+#         state: present
      - name: create lauch template
        ec2_launch_template:
          name: m5_launch_template
          image_id: ami-026dea5602e368e96
          key_name: AuburnKeyPair
          instance_type: t2.micro
-         tags: m5-asg-server
-         associate_public_ip_address: yes
-         security_groups:
-           - Module5-developer-sg
-         iam_instance_profile: 
+         network_interfaces:
+           - associate_public_ip_address: yes
+             device_index: 0
+             groups: 
+               - module5-rds-sg
+         iam_instance_profile: image-gallery-role
+         user_data: IyEvdXNyL2Jpbi9iYXNoCgoKZXhwb3J0IElNQUdFX0dBTExFUllfQk9PVFNUUkFQX1ZFUlNJT049IjEuMCIKYXdzIHMzIGNwIHMzOi8vZWR1LmF1LmNjLmltYWdlLWdhbGxlcnktY29uZmlndXJhdGlvbi9lYzItcHJvZC1sYXRlc3Quc2ggLi8KL3Vzci9iaW4vYmFzaCBlYzItcHJvZC1sYXRlc3Quc2g= 
          state: present

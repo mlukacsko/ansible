@@ -1,0 +1,19 @@
+---
+ - hosts: localhost
+   gather_facts: no
+   module_defaults:
+     group/aws:
+       region: "us-east-2"
+   tasks:
+    - name: debug
+      debug:
+        var: vpc
+    - name: create target group
+      elb_target_group:
+         name: m5-tg
+         protocol: tcp
+         port: 80
+         vpc_id: "{{ vpc.vpc.id }}"
+         state: present
+
+
