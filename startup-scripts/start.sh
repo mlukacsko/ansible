@@ -6,7 +6,16 @@
 # Install packages
 yum -y update 
 yum install -y git 
+yum install -y tree python3
+curl -O https://bootstrap.pypa.io/get-pip.py
+yum -y install python-pip
+yum install -y gcc
+pip install psycopg2-binary
+pip install psycopg2
+pip install ansible
 yum install -y postgresql 
+pip install boto3 --user
+
 
 cd /home/ec2-user 
 git clone https://github.com/mlukacsko/java-image-gallery.git 
@@ -18,5 +27,3 @@ chown -R ec2-user:ec2-user ansible
 # Start/enable services
 systemctl stop postfix 
 systemctl disable postfix 
-systemctl start nginx
-systemctl enable nginx
