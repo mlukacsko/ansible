@@ -1,0 +1,45 @@
+---
+ - hosts: localhost
+   gather_facts: yes
+   module_defaults:
+     group/aws:
+       region: "us-east-2"
+   tasks:
+    - name: Create developer security Groups
+      ec2_group:
+        name: Module5-developer-sg
+        description: developer security group
+        vpc_id: "{{ vpc.vpc.id }}"
+        rules:
+          - proto: tcp
+            ports:
+              - 22
+              - 80
+              - 5000
+              - 443
+              - 1024-65535
+            cidr_ip: 0.0.0.0/0
+            rule_desc: allowed rules
+        state: present
+      register: developer_sg
+    - name: Create rds security group
+      ec2_group:
+        name: module5-rds-sg
+        description: rds security group
+        vpc_id: "{{ vpc.vpc.id }}"
+        rules:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+        state: present
+      register: rds_sg
+    - name: Create default rds security group
+      ec2_group:
+        name: m5-default-rds-sg
+        description: rds default security group
+        vpc_id: "{{ vpc.vpc.id }}"
+        rules:
+          - proto: all
+            group_name: m5-default-rds-sg
+        state: present
+      register: default_rds_sg
+

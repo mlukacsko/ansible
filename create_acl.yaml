@@ -1,0 +1,53 @@
+---
+ - hosts: localhost
+   gather_facts: yes
+   module_defaults:
+     group/aws:
+       region: "us-east-2"
+   tasks:
+    - name: Create public Network ACL
+      ec2_vpc_nacl:
+        vpc_id: "{{ vpc.vpc.id }}"
+        name: m5-public-acl
+        region: us-east-2
+        subnets:
+          - "{{ public_subnet1.subnet.id }}"
+          - "{{ public_subnet2.subnet.id }}"
+        ingress:
+            # rule no, protocol, allow/deny, cidr, icmp_type, icmp_code,
+            #                                             port from, port to
+            - [100, 'tcp', 'allow', '0.0.0.0/0', null, null, 22, 22]
+            - [200, 'tcp', 'allow', '0.0.0.0/0', null, null, 5000, 5000]
+            - [300, 'tcp', 'allow', '0.0.0.0/0', null, null, 1024, 65535]
+            - [400, 'tcp', 'allow', '0.0.0.0/0', null, null, 25, 25]
+            - [500, 'tcp', 'allow', '0.0.0.0/0', null, null, 80, 80]
+            - [600, 'tcp', 'allow', '0.0.0.0/0', null, null, 443, 443]
+        egress:
+            - [100, 'tcp', 'allow', '0.0.0.0/0', null, null, 1024, 65535]
+            - [200, 'tcp', 'allow', '0.0.0.0/0', null, null, 443, 443]
+            - [300, 'tcp', 'allow', '0.0.0.0/0', null, null, 80, 80]
+            - [400, 'tcp', 'allow', '0.0.0.0/0', null, null, 22, 22]
+            - [500, 'tcp', 'allow', '0.0.0.0/0', null, null, 5432, 5432]
+        state: 'present'
+    - name: Create private Network ACL
+      ec2_vpc_nacl:
+        name: m5-private-acl
+        region: us-east-2
+        vpc_id: "{{ vpc.vpc.id }}"
+        subnets:
+          -  "{{ private_subnet1.subnet.id }}"
+        tags:
+          Name: m5-private-acl
+        ingress:
+            # rule no, protocol, allow/deny, cidr, icmp_type, icmp_code,
+            #                                             port from, port to
+            - [100, 'tcp', 'allow', '0.0.0.0/0', null, null, 1024, 65535]
+            - [200, 'tcp', 'allow', '0.0.0.0/0', null, null, 22, 22]
+            - [300, 'tcp', 'allow', '0.0.0.0/0', null, null, 80, 80]
+            - [400, 'tcp', 'allow', '0.0.0.0/0', null, null, 443, 443]
+            - [500, 'tcp', 'allow', '0.0.0.0/0', null, null, 5432, 5432]
+        egress:
+            - [100, 'tcp', 'allow', '0.0.0.0/0', null, null, 1024, 65535]
+            - [200, 'tcp', 'allow', '0.0.0.0/0', null, null, 443, 443]
+            - [300, 'tcp', 'allow', '0.0.0.0/0', null, null, 80, 80]
+        state: 'present'

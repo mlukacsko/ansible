@@ -12,12 +12,12 @@
         key_name: AuburnKeyPair
         group: module5-rds-sg
         instance_type: t3.micro
-        image: "{{ ami_id }}"
+        image: ami-026dea5602e368e96
         instance_tags:
           Name: Module5 Mike
           Module: 5
         wait: yes
-        vpc_subnet_id: m5-public-sn1
+        vpc_subnet_id: "{{ public_subnet1.subnet.id }}"
         assign_public_ip: yes
         exact_count: 1
         count_tag:
