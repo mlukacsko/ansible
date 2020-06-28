@@ -1,0 +1,50 @@
+---
+ - hosts: localhost
+   gather_facts: yes
+   module_defaults:
+     group/aws:
+       region: "us-east-2"
+   tasks:
+    - name: create lauch template
+      ec2_launch_template:
+        name: m5_launch_template
+        image_id: ami-026dea5602e368e96
+        key_name: AuburnKeyPair
+        instance_type: t2.micro
+        network_interfaces:
+          - associate_public_ip_address: yes
+            device_index: 0
+            groups:
+              - '{{ rds_sg.group_id }}'
+        iam_instance_profile: image-gallery-role
+        user_data: "{{ lookup('file', '~/ansible/startup-scripts/ec2_startup.sh') | b64encode }}"
+        state: present
+      register: lt
+    - name: create target group
+      elb_target_group:
+        name: m5-tg
+        protocol: tcp
+        stickiness_enabled: no
+        stickiness_type: source_ip
+        deregistration_delay_timeout: 300
+        port: 80
+        vpc_id: "{{ vpc.vpc.id }}"
+        state: present
+      register: tg
+    - name: Create auto scaling group
+      ec2_asg:
+        name: m5-asg
+        launch_template:
+          launch_template_name: m5_launch_template
+        desired_capacity: 2
+        min_size: 2
+        max_size: 4
+        target_group_arns: "{{tg.target_group_arn }}"
+        availability_zones: [ 'us-east-2c' ]
+        health_check_type: EC2
+        termination_policies: Default
+        vpc_zone_identifier:
+          - '{{ public_subnet1.subnet.id }}'
+        state: present
+      register: asg
+ 

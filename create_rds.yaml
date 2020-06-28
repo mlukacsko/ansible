@@ -1,0 +1,29 @@
+---
+ - hosts: localhost
+   gather_facts: yes
+   module_defaults:
+     group/aws:
+       region: "us-east-2"
+   tasks:
+    - name: create RDS subnet group
+      rds_subnet_group:
+        name: m5-rds-sng
+        description: private subnet group for m5 rds
+        subnets:
+          - "{{ private_subnet1.subnet.id }}"
+          - "{{ private_subnet2.subnet.id }}"
+        state: present
+      register: rds_sng
+    - name: Create RDS instance
+      rds:
+        command: create
+        instance_name: m5-ig-rds
+        db_engine: postgres
+        size: 10
+        instance_type: db.t2.micro
+        username: postgres
+        password: Blu91984
+        vpc_security_groups:
+          - "{{ rds_sg.group_id }}"
+        subnet: m5-rds-sng
+      register: rds

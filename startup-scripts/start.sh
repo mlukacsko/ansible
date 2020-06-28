@@ -5,7 +5,6 @@
 
 # Install packages
 yum -y update 
-yum install -y git 
 yum install -y tree python3
 curl -O https://bootstrap.pypa.io/get-pip.py
 yum -y install python-pip
@@ -15,6 +14,7 @@ pip install psycopg2
 pip install ansible
 yum install -y postgresql 
 pip install boto3 --user
+yum install -y git 
 
 
 cd /home/ec2-user 
