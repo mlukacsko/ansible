@@ -1,6 +1,6 @@
 ---
  - hosts: localhost
-   gather_facts: no
+   gather_facts: yes
    module_defaults:
      group/aws:
        region: "us-east-2"
@@ -8,29 +8,41 @@
     - name: create vpc
       ec2_vpc_net:
         name: Module5-vpc
-        cidr_block: 10.10.0.0/16
+        cidr_block: 10.0.0.0/16
         tags:
           Module: 5
         region: "us-east-2"
         state: present
       register: vpc
-    - name: create public subnet
+    - name: create public subnet 1
       ec2_vpc_subnet:
         vpc_id: "{{ vpc.vpc.id }}"
         tags:
-          Name: m5-public-sn
+          Name: m5-public-sn1
           Module: 5
-        cidr: 10.10.0.0/24
+        cidr: 10.0.1.0/24
+        az: us-east-2c
         region: "us-east-2"
         state: present
-      register: public_subnet
+      register: public_subnet1
+    - name: create public subnet 2
+      ec2_vpc_subnet:
+        vpc_id: "{{ vpc.vpc.id }}"
+        tags:
+          Name: m5-public-sn2
+          Module: 5
+        cidr: 10.0.4.0/24
+        az: us-east-2c
+        region: "us-east-2"
+        state: present
+      register: public_subnet2
     - name: Create private subnet 1
       ec2_vpc_subnet:
         vpc_id: "{{ vpc.vpc.id }}"
         tags:
           Name: m5-private-sn1
           Module: 5
-        cidr: 10.10.1.0/24
+        cidr: 10.0.2.0/24
         region: "us-east-2"
         az: us-east-2a
         state: present
@@ -41,7 +53,7 @@
         tags:
           Name: m5-private-sn2
           Module: 5
-        cidr: 10.10.2.0/24
+        cidr: 10.0.3.0/24
         region: "us-east-2"
         az: us-east-2b
         state: present
@@ -55,8 +67,9 @@
       register: igw
     - name: Create nat gateway
       ec2_vpc_nat_gateway:
-        subnet_id: "{{ public_subnet.subnet.id }}"
+        subnet_id: "{{ public_subnet1.subnet.id }}"
         wait: yes
+        eip_address: 3.132.8.216 
         if_exist_do_not_create: true
         state: present
       register: nat
@@ -66,7 +79,9 @@
         tags:
           Name: Module5 public rt
         subnets: 
-          - "{{ public_subnet.subnet.id }}"
+          - "{{ public_subnet1.subnet.id }}"
+          - "{{ private_subnet1.subnet.id }}"
+          - "{{ private_subnet2.subnet.id }}"
         routes:
           - dest: 0.0.0.0/0
             gateway_id: "{{ igw.gateway_id }}"
@@ -111,6 +126,16 @@
             cidr_ip: 0.0.0.0/0
         state: present
       register: rds_sg
+    - name: Create default rds security group
+      ec2_group:
+        name: m5-default-rds-sg
+        description: rds default security group
+        vpc_id: "{{ vpc.vpc.id }}"
+        rules:
+          - proto: all
+            group_name: m5-default-rds-sg
+        state: present
+      register: default_rds_sg
     - name: create RDS subnet group
       rds_subnet_group:
         name: m5-rds-sng
@@ -126,13 +151,14 @@
     - name: Create RDS instance
       rds:
         command: create
-        instance_name: M5-rds
+        instance_name: m5-ig-rds
         db_engine: postgres
         size: 10
         instance_type: db.t2.micro
         username: postgres
         password: Blu91984
-        vpc_security_groups: "{{ rds_sg.group_id }}"
+        vpc_security_groups: 
+          - "{{ rds_sg.group_id }}"
         subnet: m5-rds-sng
       register: rds 
     - name: Create public Network ACL
@@ -141,7 +167,8 @@
         name: m5-public-acl
         region: us-east-2
         subnets: 
-          - "{{ public_subnet.subnet.id }}"
+          - "{{ public_subnet1.subnet.id }}"
+          - "{{ public_subnet2.subnet.id }}"
         ingress:
             # rule no, protocol, allow/deny, cidr, icmp_type, icmp_code,
             #                                             port from, port to
@@ -190,7 +217,7 @@
           - associate_public_ip_address: yes
             device_index: 0
             groups:
-              - module5-rds-sg
+              - '{{ rds_sg.group_id }}'
         iam_instance_profile: image-gallery-role
         user_data: "{{ lookup('file', '~/ansible/startup-scripts/ec2_startup.sh') | b64encode }}"
         state: present
@@ -206,9 +233,6 @@
         vpc_id: "{{ vpc.vpc.id }}"
         state: present
       register: tg
-#    - name: debug
-#      debug:
-#        var: public_subnet.subnet.id
     - name: Create auto scaling group
       ec2_asg:
         name: m5-asg
@@ -217,6 +241,28 @@
         desired_capacity: 2
         min_size: 2
         max_size: 4
-        availability_zones: [ 'us-east-2a', 'us-east-2b' ]
-        vpc_zone_identifier: [ '"{{ public_subnet.subnet.id }}"'] 
+        target_group_arns: "{{tg.target_group_arn }}"
+        availability_zones: [ 'us-east-2c' ]
+        health_check_type: EC2
+        termination_policies: Default
+        vpc_zone_identifier: 
+          - '{{ public_subnet1.subnet.id }}'
+          - '{{ public_subnet2.subnet.id }}' 
+        state: present
       register: asg
+    - name: Provision Mike M5 ec2 instances
+      ec2:
+        key_name: AuburnKeyPair
+        group: module5-rds-sg
+        instance_type: t3.micro
+        image: ami-026dea5602e368e96
+        instance_tags:
+          Name: Module5 Mike
+          Module: 5
+        wait: yes
+        vpc_subnet_id: "{{ public_subnet1.subnet.id }}"
+        assign_public_ip: yes
+        exact_count: 1
+        count_tag:
+          Name: Module5 Mike
+        user_data: "{{ lookup('file', '~/ansible/startup-scripts/start.sh') }}"

@@ -1,6 +1,6 @@
 ---
 - hosts: localhost
-  gather_facts: no
+  gather_facts: yes
   vars:
     ami_id: "ami-026dea5602e368e96"
   module_defaults:
@@ -10,33 +10,17 @@
     - name: Provision Mike M5 ec2 instances
       ec2:
         key_name: AuburnKeyPair
-        group: Module5-developer-sg
+        group: module5-rds-sg
         instance_type: t3.micro
         image: "{{ ami_id }}"
         instance_tags:
           Name: Module5 Mike
           Module: 5
         wait: yes
-        vpc_subnet_id: "{{ public_subnet.subnet.id }}"
+        vpc_subnet_id: m5-public-sn1
         assign_public_ip: yes
         exact_count: 1
         count_tag:
           Name: Module5 Mike
-        user_data: "{{ lookup('file', 'UserData.sh') }}"
-    - name: Provision Jeff M5 ec2 instances
-      ec2:
-        key_name: AuburnKeyPair
-        group: Module5-developer-sg
-        instance_type: t3.micro
-        image: "{{ ami_id }}"
-        instance_tags:
-          Name: Module5 Jeff
-          Module: 5
-        wait: yes
-        vpc_subnet_id: "{{ public_subnet.subnet.id }}"
-        assign_public_ip: yes
-        exact_count: 1
-        count_tag:
-          Name: Module5 Jeff
-        user_data: "{{ lookup('file', 'UserData.sh') }}"
+        user_data: "{{ lookup('file', '~/ansible/startup-scripts/start.sh') }}"
 

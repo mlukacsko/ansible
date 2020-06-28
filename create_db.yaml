@@ -1,0 +1,13 @@
+---
+ - hosts: localhost
+   connection: local
+   gather_facts: no
+   module_defaults:
+     group/aws:
+       region: "us-east-2"
+   tasks:
+    - name: create postgres table
+      postgresql_db:
+        name: m5-rds
+    
+      
