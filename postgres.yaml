@@ -1,22 +1,17 @@
 ---
- - import_playbook: create_vpc.yaml
- - import_playbook: create_sg.yaml
- - import_playbook: create_rds.yaml
- - import_playbook: create_acl.yaml
- - import_playbook: create_lt.yaml
  - hosts: localhost
    gather_facts: yes
    tasks:
     - name: create image gallery db
       postgresql_db:
-        login_host: "{{ rds.instance.endpoint }}"
+        login_host: m5-ig-rds.cy7qnq8x0c88.us-east-2.rds.amazonaws.com
         login_user: postgres
         login_password: Blu91984
         name: image-gallery
         state: present
     - name: create image gallery user
       postgresql_user:
-        login_host: "{{ rds.instance.endpoint }}"
+        login_host: m5-ig-rds.cy7qnq8x0c88.us-east-2.rds.amazonaws.com
         login_user: postgres
         login_password: Blu91984
         db: image-gallery
@@ -26,7 +21,7 @@
         state: present
     - name: create users table
       postgresql_table:
-        login_host: "{{ rds.instance.endpoint }}"
+        login_host: m5-ig-rds.cy7qnq8x0c88.us-east-2.rds.amazonaws.com
         login_user: image-gallery
         login_password: simple
         db: image-gallery
@@ -38,7 +33,7 @@
         state: present
     - name: change image gallery owner
       postgresql_owner:
-        login_host: "{{ rds.instance.endpoint }}"
+        login_host: m5-ig-rds.cy7qnq8x0c88.us-east-2.rds.amazonaws.com
         login_user: postgres
         login_password: Blu91984
         db: image-gallery
