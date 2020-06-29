@@ -8,6 +8,7 @@ sudo yum install -y jq # json parser
 sudo yum install -y git
 sudo pip3 install psycopg2
 sudo pip3 install boto3
+sudo pip3 install boto
 cd /home/ec2-user
 sudo pip3 install ansible
 sudo pip3 install boto3 --user
