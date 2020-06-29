@@ -1,30 +1,30 @@
 ---
- - hosts: localhost
+ - hosts: tag_
    gather_facts: yes
    tasks:
     - name: create image gallery db
       postgresql_db:
-        login_host: m5-ig-rds.cy7qnq8x0c88.us-east-2.rds.amazonaws.com
+        login_host: "{{ rds.instance.endpoint }}"
         login_user: postgres
         login_password: Blu91984
-        name: image-gallery-1
+        name: image-gallery
         state: present
     - name: create image gallery user
       postgresql_user:
-        login_host: m5-ig-rds.cy7qnq8x0c88.us-east-2.rds.amazonaws.com
+        login_host: "{{ rds.instance.endpoint }}"
         login_user: postgres
         login_password: Blu91984
-        db: image-gallery-1
-        name: image-gallery-1
+        db: image-gallery
+        name: image-gallery
         password: simple
         priv: ALL
         state: present
     - name: create users table
       postgresql_table:
-        login_host: m5-ig-rds.cy7qnq8x0c88.us-east-2.rds.amazonaws.com
-        login_user: image-gallery-1
+        login_host: "{{ rds.instance.endpoint }}"
+        login_user: image-gallery
         login_password: simple
-        db: image-gallery-1
+        db: image-gallery
         name: users
         columns:
           - username varchar (100)
@@ -33,17 +33,17 @@
         state: present
     - name: change image gallery owner
       postgresql_owner:
-        login_host: m5-ig-rds.cy7qnq8x0c88.us-east-2.rds.amazonaws.com
+        login_host: "{{ rds.instance.endpoint }}"
         login_user: postgres
         login_password: Blu91984
-        db: image-gallery-1
-        new_owner: image-gallery-1
+        db: image-gallery
+        new_owner: image-gallery
         obj_name: users
         obj_type: table
     - name: insert stuff 
       postgresql_query:
-        login_host: m5-ig-rds.cy7qnq8x0c88.us-east-2.rds.amazonaws.com
-        login_user: image-gallery-1
+        login_host: "{{ rds.instance.endpoint }}"
+        login_user: image-gallery
         login_password: simple
-        db: image-gallery-1
+        db: image-gallery
         query: INSERT INTO users values ('test', 'hello', 'hello world')

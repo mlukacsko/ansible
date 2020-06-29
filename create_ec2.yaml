@@ -14,7 +14,7 @@
         instance_type: t3.micro
         image: ami-026dea5602e368e96
         instance_tags:
-          Name: Module5 Mike
+          Name: Module_Mike
           Module: 5
         wait: yes
         vpc_subnet_id: "{{ public_subnet1.subnet.id }}"
@@ -22,5 +22,5 @@
         exact_count: 1
         count_tag:
           Name: Module5 Mike
-        user_data: "{{ lookup('file', '~/ansible/startup-scripts/start.sh') }}"
+        user_data: "{{ lookup('file', '~/ansible/startup-scripts/ec2_startup.sh') }}"
 
