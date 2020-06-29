@@ -8,10 +8,9 @@ sudo yum install -y jq # json parser
 sudo pip3 install psycopg2
 sudo pip3 install boto3
 cd /home/ec2-user
-pip3 install ansible
-pip install ansible
-pip3 install boto3 --user
-pip3 install psycopg2 --user
+sudo pip3 install ansible
+sudo pip3 install boto3 --user
+sudo pip3 install psycopg2 --user
 cd /home/ec2-user
 git clone https://github.com/cdavidshaffer/java-image-gallery.git
 git clone https://github.com/mlukacsko/ansible.git
