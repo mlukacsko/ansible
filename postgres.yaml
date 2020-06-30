@@ -49,4 +49,4 @@
         login_user: image-gallery
         login_password: simple
         db: image-gallery
-        query: INSERT INTO users values ('test', 'hello', 'hello world')
+        query: INSERT INTO users values ('Michael', 'AuburnRules1!', 'Michael Lukacsko')
