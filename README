@@ -1,3 +1,44 @@
 Hello!
 
+Apologies for all the instructions.  
+Everything is working now and I was able to get the NLB added, so please disregard earlier comments about the NLB missing.
+
+######
+NOTE
+######
+If the NLB is deleted and recreated, the Route 53 Hosted Zone rules need to be updated with the new NLB ARN.   
+
+For testing, you will have to use the “Module5_Staging” EC2 instance to run the ansible playbook.  
+This instance remains in the VPC that I created for this assignment. 
+As a result, I am unable to tear everything down and rebuild it.  
+I have removed the following:
+(1)	Auto Scaling group
+(2)	Target group
+(3)	Security groups
+(4)	Launch template
+(5)	NAT gateway
+Again, because my M5 staging instance is running in the VPC, there are several things that I cannot delete.
+This includes the  VPC, subnets, ACL’s.  
+
+That being said, once you are connected to my staging instance, navigate to ~/ansible.
+From there, run ansible-playbook create_all.yaml.    
+Once this is completed, two instances will start.  
+After a few minutes, you can connect to www.mlukacsko.com/admin/users 
+and see the users in my db created in the ~/ansible/postgres.yaml.  
+
+########
+NOTE:  
+########
+I did not delete the RDS  or RDS security group.  IF the RDS instance in deleted, the following needs to be updated on the instances that are launched by the auto scaling group.  
+~/java-image-gallery/src/main/jave/edu/au/cc/gallery/DB.java >>  dbUrl variable needs to be updated with the RDS Endpoint.  
+
+#########
+Git Repo’s:
+##########
+https://github.com/mlukacsko/java-image-gallery.git
+https://github.com/mlukacsko/ansible.git
+
+
+
+
 
