@@ -13,10 +13,8 @@ This instance remains in the VPC that I created for this assignment.
 As a result, I am unable to tear everything down and rebuild it.  
 I have removed the following:
 (1)	Auto Scaling group
-(2)	Target group
-(3)	Security groups
-(4)	Launch template
-(5)	NAT gateway
+(2)	Launch template
+(3)	All auto scaling generated instances (two)
 Again, because my M5 staging instance is running in the VPC, there are several things that I cannot delete.
 This includes the  VPC, subnets, ACL’s.  
 
